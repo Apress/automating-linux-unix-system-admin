@@ -1,0 +1,15 @@
+copy:
+	kickstart_server::
+		$(master)/repl/root/kickstart
+				dest=/kickstart
+				mode=755
+				r=inf
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+
+	kickstart_server::
+                /kickstart mode=755 owner=root group=root inform=false
+

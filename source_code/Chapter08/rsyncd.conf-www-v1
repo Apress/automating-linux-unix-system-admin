@@ -1,0 +1,14 @@
+[www-content]
+	comment = archives
+	path = /var/lib/cfengine2/masterfiles/PROD/repl/root/var/www/html
+	use chroot = no
+	max connections = 5
+	lock file = /var/tmp/rsyncd.lock
+	read only = yes
+	list = no
+	hosts allow = rhlamp*.campin.net
+	hosts deny = 0.0.0.0/0
+	timeout = 600
+	refuse options = delete delete-excluded delete-after ignore-errors max-delete partial force
+	dont compress = *
+

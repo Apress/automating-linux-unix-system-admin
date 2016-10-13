@@ -1,0 +1,11 @@
+[groups]
+
+admins = nate,kirk
+
+[cfengine:/]
+@admins = rw
+readonly = r
+
+[binary-server:/]
+@admins = rw
+

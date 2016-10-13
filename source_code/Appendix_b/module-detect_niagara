@@ -1,0 +1,9 @@
+#!/bin/sh
+PATH=/bin:/usr/bin
+
+if /usr/platform/sun4v/sbin/prtdiag | grep UltraSPARC-T1 >/dev/null
+then
+	NUM_CORES=`/usr/platform/sun4v/sbin/prtdiag | grep UltraSPARC-T1 | wc -l | sed 's/^[ \t]*//' `
+	echo "+niagara_t1_proc"
+	echo "=num_cores=$NUM_CORES"
+fi

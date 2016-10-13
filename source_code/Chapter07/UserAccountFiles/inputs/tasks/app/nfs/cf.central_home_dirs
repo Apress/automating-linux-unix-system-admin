@@ -1,0 +1,47 @@
+control:
+	any::
+		addinstallable = ( create_homedirs enable_nfs )
+
+copy:
+	homedir_server.(solaris|solarisx86)::
+		$(master_etc)/USERFILE
+			dest=/export/home/USERFILE
+			mode=444
+			owner=root
+			group=root
+			type=checksum
+			server=$(fileserver)
+			encrypt=true
+			define=create_homedirs
+
+		$(master_etc)/skel
+			dest=/export/home/skel
+			mode=555
+			owner=root
+			group=root
+			type=checksum
+			server=$(fileserver)
+			encrypt=true
+			r=inf
+
+directories:
+	homedir_server.(solaris|solarisx86)::
+		/export/home  mode=755 owner=root group=root inform=false
+
+shellcommands:
+	homedir_server.create_homedirs.(solaris|solarisx86)::
+		"/opt/admin-scripts/setup_home_dirs"
+			timeout=300 inform=true
+
+	homedir_server.enable_nfs.(solaris|solarisx86)::
+		"/usr/sbin/svcadm enable network/nfs/server"
+			timeout=60 inform=true
+
+editfiles:
+
+	homedir_server.(solaris|solarisx86)::
+		{ /etc/dfs/dfstab
+			AppendIfNoSuchLine	"share -F nfs -o rw,anon=0 /export/home"
+			DefineClasses		"enable_nfs"
+		}
+

@@ -1,0 +1,82 @@
+
+[www-content]
+        comment = archives
+        path = /var/lib/cfengine2/masterfiles/PROD/repl/root/var/www/html
+        use chroot = no
+        max connections = 40
+        lock file = /var/tmp/rsyncd.lock
+        read only = yes
+        list = no
+        hosts allow = rhlamp.campin.net rhlamp2.campin.net
+        hosts deny = 0.0.0.0/0
+        #transfer logging = yes
+        #log format = %t: host %h (%a) %o %f (%l bytes). Total %b bytes.
+        timeout = 3600
+        refuse options = recurse delete delete-excluded delete-after ignore-errors max-delete partial force
+        dont compress = *
+
+[apache-2.2.9]
+        comment = archives
+        path = /var/lib/cfengine2/masterfiles/PROD/repl/root/usr/pkg/httpd-2.2.9
+        use chroot = no
+        max connections = 40
+        lock file = /var/tmp/rsyncd2.lock
+        read only = yes
+        list = no
+        hosts allow = rhlamp.campin.net rhlamp2.campin.net
+        hosts deny = 0.0.0.0/0
+        #transfer logging = yes
+        #log format = %t: host %h (%a) %o %f (%l bytes). Total %b bytes.
+        timeout = 3600
+        refuse options = recurse delete delete-excluded delete-after ignore-errors max-delete partial force
+        dont compress = *
+
+[php-5.2.6]
+        comment = archives
+        path = /var/lib/cfengine2/masterfiles/PROD/repl/root/usr/pkg/php-5.2.6
+        use chroot = no
+        max connections = 40
+        lock file = /var/tmp/rsyncd3.lock
+        read only = yes
+        list = no
+        hosts allow = rhlamp.campin.net rhlamp2.campin.net
+        hosts deny = 0.0.0.0/0
+        #transfer logging = yes
+        #log format = %t: host %h (%a) %o %f (%l bytes). Total %b bytes.
+        timeout = 3600
+        refuse options = recurse delete delete-excluded delete-after ignore-errors max-delete partial force
+        dont compress = *
+
+[httpd-conf]
+        comment = archives
+        path = /var/lib/cfengine2/masterfiles/PROD/repl/root/usr/pkg/httpd-conf
+        use chroot = no
+        max connections = 40
+        lock file = /var/tmp/rsyncd4.lock
+        read only = yes
+        list = no
+        hosts allow = rhlamp.campin.net rhlamp2.campin.net
+        hosts deny = 0.0.0.0/0
+        #transfer logging = yes
+        #log format = %t: host %h (%a) %o %f (%l bytes). Total %b bytes.
+        timeout = 3600
+        refuse options = recurse delete delete-excluded delete-after ignore-errors max-delete partial force
+        dont compress = *
+
+[outputs-upload]
+        comment = cfexecd outputs dir uploads
+        path = /var/log/cfoutputs
+        use chroot = no
+        max connections = 400
+        lock file = /var/tmp/rsyncd5.lock
+	read only = no
+	write only = yes
+        list = no
+        hosts allow = *.campin.net
+        hosts deny = 0.0.0.0/0
+        timeout = 3600
+	refuse options = recurse delete delete-excluded delete-after ignore-errors max-delete partial force
+        dont compress = *
+	incoming chmod = Do-rwx,Fo-rwx
+	pre-xfer exec = /usr/local/bin/rsync-outputs-dir-pre-exec
+

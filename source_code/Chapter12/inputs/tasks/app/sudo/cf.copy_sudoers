@@ -1,0 +1,24 @@
+control:
+	any::
+		AllowRedefinitionOf	= ( sudoers_file sudoers_mode sudoers_destination ) 
+		sudoers_destination	= ( "/etc/sudoers" )
+		sudoers_mode		= ( "440" )
+
+	solaris|solarisx86::
+		sudoers_destination	= ( "/opt/csw/etc/sudoers" )
+
+copy:
+	any::
+		$(master_etc)/sudoers/sudoers
+			dest=$(sudoers_destination)
+			mode=$(sudoers_mode)
+			owner=root
+			group=root
+			server=$(fileserver)
+			trustkey=true
+			type=checksum
+			encrypt=true
+			verify=false
+			size=>500
+			inform=false
+

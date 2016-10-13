@@ -1,0 +1,63 @@
+control:
+	ganglia_web.debian::
+	        addinstallable          = (     restart_apache2 )
+
+copy:
+	ganglia_web.debian::
+		$(master)/repl/root/var/www/apache2-default/ganglia
+				dest=/var/www/apache2-default/ganglia
+				mode=555
+				r=inf
+				purge=false
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_apache2
+
+                $(master_etc)/apache2/sites-available/ganglia
+                                dest=/etc/apache2/sites-available/ganglia
+                                mode=444
+                                owner=root
+                                group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=restart_apache2
+
+                $(master_etc)/apache2/ssl/ganglia.pem
+                                dest=/etc/apache2/ssl/ganglia.pem
+                                mode=444
+                                owner=root
+                                group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=restart_apache2
+
+directories:
+	ganglia_web.debian::
+		/var/www/apache2-default/ganglia  mode=755 owner=root group=root inform=true
+		/usr/pkg/ganglia-data/rrds	mode=755 owner=daemon group=daemon inform=true
+
+processes:
+	ganglia_web.debian::
+		"/usr/sbin/apache2" restart "/etc/init.d/apache2 start" inform=true umask=022
+
+		"gmetad" restart "/usr/pkg/ganglia/sbin/gmetad -c /usr/pkg/ganglia-conf/gmetad.conf " inform=true umask=022 owner=daemon
+
+shellcommands:
+	ganglia_web.debian.restart_apache2::
+		"/etc/init.d/apache2 restart"
+			timeout=60
+			umask=022
+
+links:
+	ganglia_web.debian::
+		/etc/apache2/sites-enabled/ganglia ->! /etc/apache2/sites-available/ganglia
+
+		# the make-ssl-cert utility created this link when we created ganglia.pem,
+		# we'll preserve it using cfengine
+		/etc/apache2/ssl/4c1b6a93 	   ->! /etc/apache2/ssl/ganglia.pem
+

@@ -1,0 +1,20 @@
+control:
+	addinstallable	= ( restart_dhcp )
+
+copy:
+	kickstart_server::
+		$(master)/repl/root/etc/dhcpd.conf
+				dest=/etc/dhcpd.conf
+				mode=644
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_dhcp
+
+shellcommands:
+	redhat.kickstart_server.restart_dhcp::
+                "/etc/init.d/dhcpd restart"
+                        timeout=60 inform=true
+

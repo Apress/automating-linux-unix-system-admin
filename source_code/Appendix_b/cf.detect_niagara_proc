@@ -1,0 +1,9 @@
+control:
+	sunos_sun4v::
+		addinstallable = ( niagara_t1_proc )
+		actionsequence = ( module:detect_niagara )
+
+shellcommands:
+	sunos_sun4v.niagara_t1_proc::
+		"/bin/echo hello world - I have a Niagara processor with $(num_cores) threads"
+

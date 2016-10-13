@@ -1,0 +1,69 @@
+#############################################################
+#  manual steps ahead of time
+#  $ htpasswd -c /etc/apache2/dav_svn.passwd nate
+#  Run /usr/sbin/make-ssl-cert, we put it into the ssl subdir
+###################################################
+classes:  # synonym groups:
+	have_ssl_load		= ( "/usr/bin/test -f /etc/apache2/mods-enabled/ssl.load " )
+	have_binary_repo	= ( "/usr/bin/test -d /var/svn/repository/binary-server " )
+	have_cfengine_repo	= ( "/usr/bin/test -d /var/svn/repository/cfengine " )
+
+control:
+	any::
+	        addinstallable          = (     restart_apache2
+						)
+
+copy:
+	svn_server.debian::
+		$(master_etc)/apache2
+				dest=/etc/apache2
+				mode=444
+				r=inf
+				purge=false
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_apache2
+
+directories:
+	svn_server.debian::
+		/var/svn  mode=770 owner=www-data group=www-data inform=true
+		/var/svn/repository  mode=770 owner=www-data group=www-data inform=true
+
+processes:
+	svn_server.debian::
+		"/usr/sbin/apache2" restart "/etc/init.d/apache2 start" inform=true umask=022
+
+shellcommands:
+	svn_server.debian.!have_cfengine_repo::
+                "/bin/su www-data -c \"/usr/bin/svnadmin create /var/svn/repository/cfengine\" "
+			#owner=33 # www-data user's UID
+			timeout=60
+			umask=022
+
+	svn_server.debian.!have_binary_repo::
+                "/bin/su www-data -c \"/usr/bin/svnadmin create /var/svn/repository/binary-server\" "
+			#owner=33 # www-data user's UID
+			timeout=60
+			umask=022
+
+	svn_server.debian.restart_apache2::
+                "/etc/init.d/apache2 restart"
+			timeout=60
+			umask=022
+
+	svn_server.debian.!have_ssl_load::
+                "/usr/sbin/a2enmod ssl"
+			timeout=60
+			umask=022
+
+disable:
+	svn_server.debian::
+		/etc/apache2/sites-enabled/000-default
+
+links:
+	svn_server.debian::
+		/etc/apache2/sites-enabled/svn.campin.net ->! /etc/apache2/sites-available/svn.campin.net
+

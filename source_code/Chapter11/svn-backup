@@ -1,0 +1,63 @@
+#!/bin/sh
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/opt/admin-scripts
+
+SVN_REPOS="/var/svn/repository/binary-server /var/svn/repository/cfengine"
+
+case `hostname` in
+etchlamp*)
+	echo "This is the proper host on which to backup Subversion repositories, continuing..."
+	;;
+*)
+	echo "This is NOT the proper host on which to backup Subversion repositories, exiting now..."
+	exit 1
+	;;
+esac
+
+BACKUP_BASE_DIR=/var/backups
+LOCKFILE=/root/svn_backup_lock
+
+rm_lock_file() {
+	rm -f $LOCKFILE
+}
+
+rotate_backups() {
+	BACKUP_DIR_NAME=$1
+
+	if cd $BACKUP_DIR_NAME
+	then
+		for num in 6 5 4 3 2 1
+		do
+			one_more=`expr $num + 1`
+			if [ -d backup.${num} ] 
+			then
+				if [ -d backup.${one_more} ]
+				then
+					rm -rf backup.${one_more} && mv backup.${num} backup.${one_more}
+				else
+					mv backup.${num} backup.${one_more}
+				fi
+			fi
+		done
+	else
+		echo "Can't cd to $BACKUP_DIR_NAME - exiting now"
+		rm_lock_file
+		exit 1
+	fi
+}
+
+# don't ever run two of these at once
+lockfile $LOCKFILE || exit 1
+
+for REPO in $SVN_REPOS
+do
+	SHORTNAME=`/usr/bin/basename $REPO`
+	BACKUP_DIR="$BACKUP_BASE_DIR/$SHORTNAME"
+	[ -d "$BACKUP_DIR" ] || mkdir -p $BACKUP_DIR
+
+	cd $BACKUP_DIR && rotate_backups $BACKUP_DIR
+
+	/usr/bin/svnadmin hotcopy $REPO $BACKUP_DIR/backup.1
+done
+
+# if we get here without errors, clean up
+rm_lock_file

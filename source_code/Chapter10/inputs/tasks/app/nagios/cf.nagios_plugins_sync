@@ -1,0 +1,129 @@
+control:
+	any::
+		plugins_ver	= ( "nagios-plugins-1.4.12" )
+
+copy:
+
+	redhat.i686::
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-redhat.i686
+				dest=/usr/pkg/$(plugins_ver)
+				r=inf
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=rw
+				exclude=rw
+				type=checksum
+				purge=false
+				server=$(fileserver)
+				encrypt=true
+                                exclude=check_dhcp
+                                exclude=check_icmp
+
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-redhat.i686/libexec/check_dhcp
+                                dest=/usr/pkg/$(plugins_ver)/libexec/check_dhcp
+                                mode=4555
+                                type=checksum
+                                server=$(fileserver)
+                                trustkey=true
+                                encrypt=true
+                                owner=root
+                                group=root
+
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-redhat.i686/libexec/check_icmp
+                                dest=/usr/pkg/$(plugins_ver)/libexec/check_icmp
+                                mode=4555
+                                type=checksum
+                                server=$(fileserver)
+                                trustkey=true
+                                encrypt=true
+                                owner=root
+                                group=root
+
+	debian.i686::
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-debian.i686
+				dest=/usr/pkg/$(plugins_ver)
+				r=inf
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=rw
+				exclude=rw
+				type=checksum
+				purge=false
+				server=$(fileserver)
+				encrypt=true
+                                exclude=check_dhcp
+                                exclude=check_icmp
+
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-debian.i686/libexec/check_dhcp
+                                dest=/usr/pkg/$(plugins_ver)/libexec/check_dhcp
+                                mode=4555
+                                type=checksum
+                                server=$(fileserver)
+                                trustkey=true
+                                encrypt=true
+                                owner=root
+                                group=root
+
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-debian.i686/libexec/check_icmp
+                                dest=/usr/pkg/$(plugins_ver)/libexec/check_icmp
+                                mode=4555
+                                type=checksum
+                                server=$(fileserver)
+                                trustkey=true
+                                encrypt=true
+                                owner=root
+                                group=root
+
+	sunos_sun4u::
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-sunos.sun4u
+				dest=/usr/pkg/$(plugins_ver)
+				r=inf
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=rw
+				exclude=rw
+				type=checksum
+				purge=false
+				server=$(fileserver)
+				encrypt=true
+                                exclude=check_dhcp
+                                exclude=check_icmp
+                                exclude=pst3
+
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-sunos.sun4u/libexec/check_dhcp
+                                dest=/usr/pkg/$(plugins_ver)/libexec/check_dhcp
+                                mode=4555
+                                type=checksum
+                                server=$(fileserver)
+                                trustkey=true
+                                encrypt=true
+                                owner=root
+                                group=root
+
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-sunos.sun4u/libexec/check_icmp
+                                dest=/usr/pkg/$(plugins_ver)/libexec/check_icmp
+                                mode=4555
+                                type=checksum
+                                server=$(fileserver)
+                                trustkey=true
+                                encrypt=true
+                                owner=root
+                                group=root
+
+		$(master)/repl/root/usr/pkg/$(plugins_ver)-sunos.sun4u/libexec/pst3
+                                dest=/usr/pkg/$(plugins_ver)/libexec/pst3
+                                mode=4555
+                                type=checksum
+                                server=$(fileserver)
+                                trustkey=true
+                                encrypt=true
+                                owner=root
+                                group=root
+
+links:
+	any::
+		/usr/pkg/nagios-plugins ->! /usr/pkg/$(plugins_ver)
+

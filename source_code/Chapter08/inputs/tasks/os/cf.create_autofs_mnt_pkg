@@ -1,0 +1,40 @@
+control:
+
+	old_binary_server	= ( made_up_name )
+	binary_server		= ( aurora )
+
+editfiles:
+
+	i686.debian::
+		{ /etc/auto_mnt_pkg
+			AutoCreate
+
+			AppendIfNoSuchLine              "*       -nolock,rsize=32767,wsize=32767,proto=tcp,hard,intr,timeo=8,nosuid,retrans=5    $(binary_server):/export/pkg/i686.debian/&"
+
+			DeleteLinesContaining   "*       -nolock,rsize=32767,wsize=32767,proto=tcp,hard,intr,timeo=8,nosuid,retrans=5    $(old_binary_server):/export/pkg/i686.debian/&"
+
+			DefineClasses "restartautofs"
+        	}
+
+	i686.redhat::
+		{ /etc/auto_mnt_pkg
+			AutoCreate
+			AppendIfNoSuchLine              "*       -nolock,rsize=32767,wsize=32767,proto=tcp,hard,intr,timeo=8,nosuid,retrans=5    $(binary_server):/export/pkg/i686.redhat/&"
+
+			DeleteLinesContaining              "*       -nolock,rsize=32767,wsize=32767,proto=tcp,hard,intr,timeo=8,nosuid,retrans=5    $(old_binary_server):/export/pkg/i686.redhat/&"
+			DefineClasses "restartautofs"
+        	}
+
+	sunos_sun4u::
+		{ /etc/auto_mnt_pkg
+			AutoCreate
+			AppendIfNoSuchLine              "*       -nolock,rsize=32767,wsize=32767,proto=tcp,hard,intr,timeo=8,nosuid,retrans=5    $(binary_server):/export/pkg/sunos_sun4u/&"
+
+			DeleteLinesContaining              "*       -nolock,rsize=32767,wsize=32767,proto=tcp,hard,intr,timeo=8,nosuid,retrans=5    $(old_binary_server):/export/pkg/sunos_sun4u/&"
+			DefineClasses "restartautofs"
+        	}
+
+directories:
+	any::
+		/mnt/pkg mode=755 owner=root group=root inform=false
+

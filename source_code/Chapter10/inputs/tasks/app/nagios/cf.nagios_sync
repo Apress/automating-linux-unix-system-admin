@@ -1,0 +1,116 @@
+control:
+	nagios_host::
+		nagios_ver	= ( "nagios-3.0.3" )
+		addinstallable	= ( restart_nagios  restart_apache2 setup_nagios_rc_scripts )
+
+classes:  # synonym groups:
+	nagios_host.i686::
+		#have_nagios_dir		= ( IsDir(/usr/pkg/$(nagios_ver)) )
+		have_nagios_dir		= ( "/usr/bin/test -d /usr/pkg/$(nagios_ver)" )
+
+copy:
+	nagios_host.debian.i686.!have_nagios_dir::
+		$(master)/repl/root/usr/pkg/$(nagios_ver)-debian.i686
+				dest=/usr/pkg/$(nagios_ver)
+				r=inf
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=etc
+				exclude=etc
+				ignore=rw
+				exclude=rw
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_nagios
+
+	nagios_host.debian::
+		$(master)/repl/root/usr/pkg/nagios-conf
+				dest=/usr/pkg/nagios-conf
+				mode=644
+				r=inf
+				owner=nagios
+				group=nagios
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_nagios
+				purge=true
+
+		$(master)/repl/root/etc/init.d/nagios
+				dest=/etc/init.d/nagios
+				mode=755
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=setup_nagios_rc_scripts
+				define=restart_nagios
+
+		$(master_etc)/apache2/sites-available/nagios.conf
+				dest=/etc/apache2/sites-available/nagios.conf
+				mode=444
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_apache2
+
+		$(master_etc)/apache2/ssl/nagios.pem
+				dest=/etc/apache2/ssl/nagios.pem
+				mode=444
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_apache2
+
+		# this will be a different filename at each site
+		$(master_etc)/apache2/ssl/5796a599
+				dest=/etc/apache2/ssl/5796a599
+				mode=444
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_apache2
+
+shellcommands:
+	debian.nagios_host.restart_nagios::
+		"/etc/init.d/nagios restart" timeout=60 inform=true
+
+	debian.nagios_host.restart_apache2::
+		"/etc/init.d/apache2 restart" timeout=60 umask=022
+
+	debian.nagios_host.setup_nagios_rc_scripts::
+		# This is really only needed the first time Nagios is setup,
+		# but this is a totally non-destructive command if run when the links
+		# are already there. We are safe.
+		"/usr/sbin/update-rc.d nagios start 30 2 3 4 5 . stop 70 0 1 6 ."
+			timeout=60 umask=022
+
+directories:
+	debian.i686.nagios_host::
+		/usr/pkg/$(nagios_ver)/var/rw m=2775 owner=nagios group=nagcmd inform=false
+
+processes:
+	debian.nagios_host::
+                "nagios" restart "/etc/init.d/nagios start" inform=true umask=022
+		"/usr/sbin/apache2" restart "/etc/init.d/apache2 start" inform=true umask=022
+
+links:
+	debian.nagios_host::
+		/usr/pkg/$(nagios_ver)/etc	->! /usr/pkg/nagios-conf
+		/usr/pkg/nagios			->! /usr/pkg/$(nagios_ver)
+
+		/etc/apache2/sites-enabled/nagios.conf ->! /etc/apache2/sites-available/nagios.conf
+
+		# the make-ssl-cert utility created this link when we created nagios.pem,
+		# we'll preserve it using cfengine
+		/etc/apache2/ssl/5796a599       ->! /etc/apache2/ssl/nagios.pem
+

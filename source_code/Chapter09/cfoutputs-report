@@ -1,0 +1,26 @@
+#!/bin/sh
+###############################################################################
+# This script only works with GNU find, so make sure it's a Linux host,
+# or that GNU find comes up first in your PATH.
+###############################################################################
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/opt/admin-scripts
+
+case `hostname` in
+goldmaster*)
+	echo "This is the proper host on which to run cfoutputs reports, continuing..."
+	;;
+*)
+	echo "This is NOT the proper host on which to run cfoutputs reports, exiting now."
+	exit 1
+	;;
+esac
+
+THRESHOLD=60
+RECIPIENTS=ops@example.org
+
+cd /var/log/cfoutputs && \
+for dir in * 
+do
+	find $dir -mmin -$THRESHOLD -type f | xargs cat
+done | mail -s"cfoutputs report for last $THRESHOLD minutes" $RECIPIENTS
+

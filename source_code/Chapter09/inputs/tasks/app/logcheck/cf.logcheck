@@ -1,0 +1,38 @@
+copy:
+	any::
+		$(master)/repl/root/usr/pkg/logcheck
+			dest=/usr/pkg/logcheck/
+					r=inf
+					mode=750
+					type=checksum
+					ignore=/usr/pkg/logcheck/tmp
+					ignore=tmp
+					ignore=tmp/*
+					ignore=check
+					ignore=host
+					purge=true
+					server=$(fileserver)
+					encrypt=true
+
+directories:
+	debian::
+		/usr/pkg/logcheck/ mode=750 owner=root group=root inform=false
+
+shellcommands:
+	#
+	# Runnning at 0600 lets us catch the logs before they're rotated.  We
+	# then run one more time during the workday to see what's been going
+	# on.
+	#
+	(Hr06|Hr16).Min00_05.weekday::
+		"/usr/pkg/logcheck/newlogcheck.sh " 
+			timeout=7200 inform=true
+	
+	#
+	# we rotate logs daily shortly after 6am, so we need a single run on
+	# weekend mornings too.
+	#
+	Hr06.Min00_05.weekend::
+		"/usr/pkg/logcheck/newlogcheck.sh " 
+			timeout=7200 inform=true
+

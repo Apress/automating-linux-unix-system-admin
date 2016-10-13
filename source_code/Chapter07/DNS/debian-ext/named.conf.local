@@ -1,0 +1,21 @@
+//
+// Do any local configuration here, but not on the end host...
+//
+// distributed by cfengine, don't edit anywhere but the cfengine master
+//
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+include "/etc/bind/zones.rfc1918";
+
+zone "campin.net" {
+        type master;
+        file "/etc/bind/db.campin.net";
+};
+
+zone "168.192.in-addr.arpa" {
+        type master;
+        file "/etc/bind/db.192.168";
+};
+

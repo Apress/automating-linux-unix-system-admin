@@ -1,0 +1,69 @@
+#############################################################
+#
+# disted by cfengine - don't edit locally
+#
+#############################################################
+control:
+	any::
+	        addinstallable          = (     hup_syslog_ng
+						restart_syslog_ng
+						restartsyslogd
+						)
+		AllowRedefinitionOf	= ( syslog_ng_conf_file )
+	
+	debian::
+		syslog_ng_conf_file	= ( syslog-ng.conf-debian )
+
+	debian.sysloghost::
+		syslog_ng_conf_file	= ( syslog-ng.conf-sysloghost	)
+
+copy:
+	debian::
+		$(master_etc)/syslog-ng/$(syslog_ng_conf_file)
+				dest=/etc/syslog-ng/syslog-ng.conf
+				mode=444
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=hup_syslog_ng
+
+editfiles:
+        redhat::
+                { /etc/syslog.conf
+			AppendIfNoSuchLine '*.*		@sysloghost.campin.net'
+			DefineClasses "restartsyslogd"
+                }
+
+	solaris|solarisx86::
+                { /etc/syslog.conf
+
+	                #AutoCreate
+			AppendIfNoSuchLine '*.info		@sysloghost.campin.net'
+			DefineClasses "restartsyslogd"
+                }
+
+processes:
+        hup_syslog_ng::
+                # when syslog-ng.conf is updated, HUP syslog-ng
+                "syslog-ng" signal=hup inform=false
+
+	debian::
+		"/sbin/syslog-ng" restart "/etc/init.d/syslog-ng start"
+			inform=false umask=022
+
+	restartsyslogd::
+		"syslogd" signal=hup inform=true
+
+shellcommands:
+        restart_syslog_ng::
+                "/etc/init.d/syslog-ng stop; sleep 1 ; /etc/init.d/syslog-ng start"
+			timeout=10
+
+disable:
+        debian::
+		# these break logrotate, remove them
+		/etc/cron.daily/exim4-base
+		/etc/logrotate.d/exim4-base
+

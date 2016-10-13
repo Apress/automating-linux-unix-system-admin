@@ -1,0 +1,21 @@
+control:
+	any::
+		AddInstallable = ( reload_httpd )
+
+copy:
+	redhat.web_server::
+	        $(master_etc)/httpd/conf/httpd.conf
+				dest=/etc/httpd/conf/httpd.conf
+                                mode=444
+				owner=root
+				group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=reload_httpd
+
+shellcommands:
+	redhat.web_server.reload_httpd::
+		"/etc/init.d/httpd reload"
+			timeout=60 inform=true
+

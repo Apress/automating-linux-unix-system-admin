@@ -1,0 +1,16 @@
+copy:
+	jumpstart_server::
+		$(master)/repl/root/jumpstart/profiles
+				dest=/jumpstart/profiles
+				mode=755
+				r=inf
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+
+directories:
+	jumpstart_server::
+                /jumpstart/profiles mode=755 owner=root group=root inform=false
+

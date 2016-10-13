@@ -1,0 +1,110 @@
+#!/bin/sh
+###############################################################################
+# This script was written to work on Debian Linux, specifically the Debian host
+# serving as the cfengine master at our site. Analysis should be done before
+# attempting to run elsewhere.
+###############################################################################
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/opt/admin-scripts
+
+# this is the deepest shared directory for all the 
+#  passwd/shadow/group files
+BASE_PATH=/var/lib/cfengine2/masterfiles/PROD/repl/root/etc
+USERNAME_FILE=/var/lib/cfengine2/masterfiles/PROD/repl/root/etc/USERFILE
+
+case `hostname` in
+goldmaster*)
+	echo "This is the proper host on which to add users, continuing..."
+	;;
+*)
+	echo "This is NOT the proper host on which to add users, exiting now..."
+	exit 1
+	;;
+esac
+
+cd $BASE_PATH
+
+LOCKFILE=/root/add_user_lock
+
+rm_lock_file() {
+	rm -f $LOCKFILE
+}
+
+# don't ever run two of these at once
+lockfile $LOCKFILE || exit 1
+
+# We REALLY need to sanity check what we accept here, before blindly
+# trusting the values, that's an excercise for the reader.
+echo "Please specify a username for your new account, 8 chars or less: "
+read USERNAME
+
+echo "Please give the person's full name for your new account: "
+read GECOS
+
+stty -echo
+echo "Please specify a password for your new account: "
+read PASSWORD
+stty echo
+
+ENC_PASS=`echo $PASSWD | mkpasswd -s`
+
+[ -f "$BASE_PATH/NEXTUID" ] || echo 1001 > $BASE_PATH/NEXTUID
+
+NEXTUID=`cat $BASE_PATH/NEXTUID`
+if [ -n "$NEXTUID" -a $NEXTUID -gt 1000 ]
+then
+	echo "Our next UID appears valid, continuing..."
+else
+	echo "The $BASE_PATH/NEXTUID file appears to be corrupted, please investigate."
+	echo "Exiting now..."
+	exit 1
+fi
+
+SEC_SINCE_EPOCH=`date +%s`
+
+GROUP_FORMAT="$USERNAME:x:$NEXTUID:"
+PASSWD_FORMAT="$USERNAME:x:$NEXTUID:$NEXTUID:$GECOS:/home/$USERNAME:/bin/bash"
+SHADOW_FORMAT="$USERNAME:$ENC_PASS:$SEC_SINCE_EPOCH:7:180:14:7::"
+
+for groupfile in group/group*
+do
+	cp $groupfile ${groupfile}.tmp && \
+	echo $GROUP_FORMAT >> ${groupfile}.tmp && \
+	mv ${groupfile}.tmp $groupfile || \
+	( echo "Failed to update $groupfile - exiting now." ; rm_lock_file ; exit 1 )
+done
+
+for shadowfile in shadow/shadow*
+do
+	cp $shadowfile ${shadowfile}.tmp && \
+	echo $SHADOW_FORMAT >> ${shadowfile}.tmp && \
+	mv ${shadowfile}.tmp $shadowfile || \
+	( echo "Failed to update $shadowfile - exiting now." ; rm_lock_file ; exit 1 )
+
+done
+
+for passwdfile in passwd/passwd*
+do
+	cp $passwdfile ${passwdfile}.tmp && \
+	echo $PASSWD_FORMAT >> ${passwdfile}.tmp && \
+	mv ${passwdfile}.tmp $passwdfile || \
+	( echo "Failed to update $passwdfile - exiting now." ; rm_lock_file ; exit 1 )
+done
+
+# update the UID file
+NEWUID=`expr $NEXTUID + 1`
+echo $NEWUID > $BASE_PATH/NEXTUID || \
+ ( echo "Update of $BASE_PATH/NEXTUID failed, exiting now" ; rm_lock_file ; exit 1 )
+
+# update a file used to create home dirs on the NFS server
+if [ ! -f $USERNAME_FILE ]
+then
+	touch $USERNAME_FILE
+fi
+
+cp $USERNAME_FILE ${USERNAME_FILE}.tmp && \
+echo $USERNAME >> ${USERNAME_FILE}.tmp && \
+mv ${USERNAME_FILE}.tmp $USERNAME_FILE || \
+ ( echo "failed to update $USERNAME_FILE with this user's account name." ; rm_lock_file ; exit 1 )
+
+# if we get here without errors, clean up
+rm_lock_file

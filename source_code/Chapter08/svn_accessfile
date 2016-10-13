@@ -1,0 +1,10 @@
+[groups]
+
+admins = nate,kirk
+
+[cfengine:/]
+@admins = rw
+
+[binary-server:/]
+@admins = rw
+

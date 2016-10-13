@@ -1,0 +1,131 @@
+#!/bin/sh
+###################################################
+#
+# Be very, very afraid when changing this script ...it's meant to get
+# cfengine to a state where it'll work properly. It's intended for
+# such things as getting the basic files and directories in place for
+# cfengine.
+# This script should be fast, simple and efficient.
+# Errors/mistakes are to be avoided at all costs.
+#
+###################################################
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/pkg/cfengine/sbin:/opt/csw/sbin:/opt/csw/bin
+export PATH
+
+CFWORKDIR=/var/cfengine
+
+if [ -f /etc/debian_version ]; then
+	CFWORKDIR=/var/lib/cfengine2
+fi
+
+create_update_conf() {
+
+# create basic update.conf, meant to update all the config
+# files from the master
+
+cat <<EOF | tee $CFWORKDIR/inputs/update.conf $CFWORKDIR/inputs/cfagent.conf
+###############################################################
+# Created by cf.preconf, and you shouldn't ever see this comment
+# in \$CFWORKDIR/inputs/update.conf or
+# \$CFWORKDIR/inputs/cfagent.conf
+#
+# The fact that you're reading it now it means that this host wasn't
+# able to pull files from the cfengine server (as of this writing:
+# goldmaster.campin.net).
+#
+# Please investigate. Normally it means you're having cfengine key
+# or access control issues.
+###############################################################
+control:
+
+	solaris|solarisx86::
+		cf_base_path = ( /opt/csw/sbin )
+		workdir = ( /var/cfengine )
+		client_cfinput = ( /var/cfengine/inputs )
+
+	debian::
+		cf_base_path = ( /usr/sbin )
+		workdir = ( /var/lib/cfengine2 )
+		client_cfinput = ( /var/lib/cfengine2/inputs )
+
+	redhat::
+		cf_base_path = ( /usr/pkg/cfengine/sbin )
+		workdir = ( /var/cfengine )
+		client_cfinput = ( /var/cfengine/inputs )
+
+	!debian.!redhat.!(solaris|solarisx86)::
+		# take a best guess on the path for other hosts, since we use
+		# any:: below to keep cfengine procs alive on all hosts
+		# We could use debian.32_bit.sunos_sun4u:: instead but we'd rather
+		# at least try on other hosts
+		cf_base_path = ( /usr/pkg/cfengine/sbin )
+		workdir = ( /var/cfengine )
+		client_cfinput = ( /var/cfengine/inputs )
+
+	any::
+		actionsequence = (	copy.IfElapsed0
+					links.IfElapsed0
+					processes.IfElapsed0
+		)
+
+	domain		= ( campin.net )
+	policyhost	= ( goldmaster.campin.net )
+	master_cfinput	= ( /var/lib/cfengine2/masterfiles/PROD/inputs )
+	SplayTime	= ( 0 )
+
+ignore:
+	# RCS and subversion directories will be ignored in all copies
+	RCS
+	.svn
+
+processes:
+	any::
+		"cfexecd" restart "\$(cf_base_path)/cfexecd"
+		"cfservd" restart "\$(cf_base_path)/cfservd"
+		"cfenvd" restart "\$(cf_base_path)/cfenvd"
+
+links:
+	# for some reason Solaris x86 doesn't always consider itself
+	# "solaris", so we add "solarisx86". Newer cfengine versions
+	# seem to have fixed this, but we're paranoid. :)
+	redhat|solaris|solarisx86::
+		/var/cfengine/bin/cfagent -> \$(cf_base_path)/cfagent
+
+copy:
+	\$(master_cfinput)/	dest=\$(workdir)/inputs/
+				r=inf
+				mode=700
+				type=binary
+				exclude=*~
+				exclude=#*
+				exclude=*,v
+				purge=true
+				server=\$(policyhost)
+				trustkey=true
+				encrypt=true
+
+EOF
+}
+
+DIRS="$CFWORKDIR/ppkeys $CFWORKDIR/inputs $CFWORKDIR/bin"
+for dir in $DIRS
+do
+	[ -d $dir ] || mkdir -p $dir && chmod 700 $dir
+done
+
+CURRENT_CF_RH_VER=cfengine-2.2.7
+
+if [ -f /etc/redhat-release ]; then
+	# need a critical symlink
+	if [ -d /usr/pkg/$CURRENT_CF_RH_VER -a ! -d /usr/pkg/cfengine ]; then
+		ln -s /usr/pkg/$CURRENT_CF_RH_VER /usr/pkg/cfengine
+	fi
+fi
+
+if [ ! -f $CFWORKDIR/inputs/update.conf ]; then
+	create_update_conf
+fi
+
+[ -f $CFWORKDIR/ppkeys/localhost.priv ] || cfkey
+

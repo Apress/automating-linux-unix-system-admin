@@ -1,0 +1,96 @@
+control:
+	any::
+		addinstallable	= ( restart_nrpe  )
+		nrpe_ver	= ( "nrpe-2.12" )
+
+copy:
+	debian.i686::
+		$(master)/repl/root/usr/pkg/$(nrpe_ver)-bin/nrpe-debian.i686
+				dest=/usr/pkg/$(nrpe_ver)/sbin/nrpe
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=rw
+				exclude=rw
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_nrpe
+
+	redhat.i686::
+		$(master)/repl/root/usr/pkg/$(nrpe_ver)-bin/nrpe-redhat.i686
+				dest=/usr/pkg/$(nrpe_ver)/sbin/nrpe
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=rw
+				exclude=rw
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_nrpe
+
+	sunos_sun4u::
+		$(master)/repl/root/usr/pkg/$(nrpe_ver)-bin/nrpe-sunos_sun4u
+				dest=/usr/pkg/$(nrpe_ver)/sbin/nrpe
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=rw
+				exclude=rw
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_nrpe
+
+	any::
+		$(master)/repl/root/etc/init.d/nrpe
+				dest=/etc/init.d/nrpe
+				mode=755
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_nrpe
+
+		$(master)/repl/root/usr/pkg/nrpe-conf/nrpe.cfg
+				dest=/usr/pkg/nrpe/etc/nrpe.cfg
+				mode=755
+				owner=nagios
+				group=nagios
+				ignore=rw
+				exclude=rw
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_nrpe
+
+shellcommands:
+	restart_nrpe::
+		"/etc/init.d/nrpe restart" timeout=60 inform=true
+
+directories:
+	any::
+		/usr/pkg/$(nrpe_ver)/sbin m=775 owner=nagios group=nagcmd inform=false
+		/usr/pkg/$(nrpe_ver)/etc m=775 owner=nagios group=nagcmd inform=false
+
+processes:
+	any::
+                "nrpe" restart "/etc/init.d/nrpe start" inform=true umask=022
+
+links:
+	any::
+		/usr/pkg/nrpe		->! /usr/pkg/$(nrpe_ver)
+
+		# rc scripts
+		/etc/rc0.d/S02nrpe	->! /etc/init.d/nrpe
+		/etc/rc1.d/S02nrpe	->! /etc/init.d/nrpe
+		/etc/rc2.d/S98nrpe	->! /etc/init.d/nrpe
+
+	any.!(solaris|solarisx86)::
+		/etc/rc3.d/S98nrpe	->! /etc/init.d/nrpe
+		/etc/rc4.d/S98nrpe	->! /etc/init.d/nrpe
+		/etc/rc5.d/S98nrpe	->! /etc/init.d/nrpe
+		/etc/rc6.d/S02nrpe	->! /etc/init.d/nrpe
+

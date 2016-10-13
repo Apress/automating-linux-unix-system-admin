@@ -1,0 +1,35 @@
+control:
+	debian_4_0.relayhost::
+		main_cf		= ( "main.cf_debian-relayhost" )
+		virtual		= ( "virtual-relayhost" )
+
+copy:
+	debian_4_0.relayhost::
+	        $(master_etc)/postfix/$(main_cf)
+				dest=$(main_cf_dest)
+                                mode=444
+				owner=root
+				group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+				# we already have reloadpostfix from
+				# tasks/os/cf.resolve_conf, we are reusing it
+                                define=reloadpostfix
+
+	debian_4_0.relayhost::
+	        $(master_etc)/postfix/$(virtual)
+				dest=/etc/postfix/virtual
+                                mode=444
+				owner=root
+				group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=rebuild_virtual_map
+
+shellcommands:
+	debian.rebuild_virtual_map::
+		"/usr/sbin/postmap /etc/postfix/virtual ; /usr/sbin/postfix reload "
+			timeout=60 inform=true
+

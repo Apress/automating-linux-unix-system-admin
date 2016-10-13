@@ -1,0 +1,33 @@
+classes: # synonym groups:
+	have_usr_bin_rsync = ( "/usr/bin/test -f /usr/bin/rsync " )
+	have_etc_inetd_conf = ( "/usr/bin/test -f /etc/inetd.conf " )
+
+control:
+	any::
+		AddInstallable = ( hup_inetd )
+
+	web_master.debian::
+		rsyncd_conf = ( "rsyncd.conf-www" )
+
+copy:
+	web_master.debian::
+		$(master_etc)/rsync/rsyncd.conf-www
+			dest=/etc/rsyncd.conf
+			mode=444
+			owner=root
+			group=root
+			type=checksum
+			server=$(fileserver)
+			encrypt=true
+
+editfiles:
+	web_master.debian.have_etc_inetd_conf.have_usr_bin_rsync::
+		{ /etc/inetd.conf
+			AppendIfNoSuchLine "rsync stream tcp nowait daemon /usr/bin/rsync rsyncd --daemon --config=/etc/rsyncd.conf"
+			DefineClasses "hup_inetd"
+		}
+
+processes:
+	web_master.debian.hup_inetd::
+		"inetd" signal=hup inform=true
+

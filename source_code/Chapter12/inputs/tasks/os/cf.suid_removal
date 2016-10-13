@@ -1,0 +1,69 @@
+files:
+
+	debian.Hr01.Min40_45::
+		/
+			filter=rootownedfiles
+			mode=-4000	# no SUID for rootownedfiles
+			recurse=inf
+			action=fixall
+			inform=true
+			ignore=/usr/bin/passwd
+			ignore=/usr/bin/traceroute.lbl
+			ignore=/usr/pkg/nagios-plugins-1.4.12/libexec/check_icmp
+			ignore=/usr/pkg/nagios-plugins-1.4.12/libexec/check_dhcp
+			ignore=/usr/lib/pt_chown
+			ignore=/sbin/unix_chkpwd
+			ignore=/bin/ping
+			ignore=/bin/su
+			ignore=/usr/bin/sudo
+			syslog=on
+			xdev=on
+
+	redhat.Hr01.Min40_45::
+		/
+			filter=rootownedfiles
+			mode=-4000	# no SUID for rootownedfiles
+			recurse=inf
+			action=fixall
+			inform=true
+			ignore=/usr/pkg/nagios-plugins-1.4.12/libexec/check_dhcp
+			ignore=/usr/pkg/nagios-plugins-1.4.12/libexec/check_icmp
+			ignore=/usr/bin/sudo
+			ignore=/usr/bin/crontab
+			ignore=/usr/bin/at
+			ignore=/usr/bin/sudoedit
+			ignore=/usr/sbin/ccreds_validate
+			ignore=/bin/ping
+			ignore=/bin/su
+			ignore=/sbin/unix_chkpwd
+			ignore=/sbin/pam_timestamp_check
+			syslog=on
+			xdev=on
+
+        (solaris|solarisx86).Hr01.Min40_45::
+                /
+                        filter=rootownedfiles
+                        mode=u-s         # no SUID
+                        exclude=pt_chmod
+                        recurse=inf
+                        action=fixall
+                        inform=true
+                        ignore=/proc
+			ignore=/opt/csw/bin/sudo.minimal
+			ignore=/opt/csw/bin/sudo
+			ignore=/opt/csw/bin/sudoedit
+			ignore=/usr/bin/at
+			ignore=/usr/bin/atq
+			ignore=/usr/bin/atrm
+			ignore=/usr/bin/crontab
+			ignore=/usr/bin/su
+			ignore=/usr/lib/pt_chmod
+			ignore=/usr/lib/utmp_update
+			ignore=/usr/sbin/traceroute
+			ignore=/usr/sbin/ping
+			ignore=/usr/pkg/nagios-plugins-1.4.12/libexec/check_dhcp
+			ignore=/usr/pkg/nagios-plugins-1.4.12/libexec/check_icmp
+			ignore=/usr/pkg/nagios-plugins-1.4.12/libexec/pst3
+                        syslog=on
+			xdev=on
+

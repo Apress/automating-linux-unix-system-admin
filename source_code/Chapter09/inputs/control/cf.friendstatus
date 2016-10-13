@@ -1,0 +1,25 @@
+control:
+	#
+	# This fragment, only run on the policy server, generates warnings
+	# regarding cfengine clients that have connected before, but have not
+	# connected withing the past 24 hours (a sign that there is likely a
+	# problem with the client in question). Records for clients that have
+	# not connected for 14 days are purged from the database, so a down host
+	# should generate no more that two such warnings.
+	#
+	# Clients unseen for 14 days purged from cf_lastseen.db
+	# http://www.cfengine.org/docs/cfengine-Reference.html#lastseenexpireafter
+	#
+
+	policyhost::
+		LastSeenExpireAfter = ( 14 )
+
+alerts:
+	policyhost::
+		#
+		# Warn about hosts that have not connected within the last X hours
+		# http://www.cfengine.org/docs/cfengine-Reference.html#alerts      
+		#
+		FriendStatus(4)
+		ifelapsed=360
+

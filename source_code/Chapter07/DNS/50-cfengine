@@ -1,0 +1,22 @@
+#! /usr/sbin/cfagent -f
+
+control:
+   any::
+   actionsequence = ( editfiles )
+   EditFileSize = ( 30000 )
+
+editfiles:
+   any::
+	{ ${target}/etc/aliases
+	  AutoCreate
+          AppendIfNoSuchLine "root: nate@campin.net"
+	}
+
+	{ ${target}/etc/default/cfengine2
+	  ReplaceAll "=0$" With "=1"
+	}
+
+	{ ${target}/etc/init.d/bootmisc.sh
+          AppendIfNoSuchLine "/usr/sbin/cfagent -qv"
+	}
+

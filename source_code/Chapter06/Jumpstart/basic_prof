@@ -1,0 +1,7 @@
+Install_type	initial_install
+System_type	standalone
+partitioning	explicit
+filesys		c0t0d0s0 10000 /
+filesys		c0t0d0s1 1024 swap
+filesys		c0t0d0s7 free /opt
+cluster		SUNWCXall

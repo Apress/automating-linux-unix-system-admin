@@ -1,0 +1,35 @@
+classes:  # synonym groups:
+	have_var_spool_postfix		= ( IsDir("/var/spool/postfix") )
+	have_var_spool_postfix_public	= ( IsDir("/var/spool/postfix/public") )
+	have_var_spool_postfix_maildrop	= ( IsDir("/var/spool/postfix/maildrop") )
+	have_usr_sbin_postdrop		= ( IsDir("/usr/sbin/postdrop") )
+	have_usr_sbin_postqueue		= ( IsDir("/usr/sbin/postqueue") )
+
+directories:
+
+	debian.have_var_spool_postfix_public::
+		/var/spool/postfix/public mode=2710 owner=postfix group=postdrop inform=true
+
+	debian.have_var_spool_postfix_maildrop::
+		/var/spool/postfix/maildrop mode=1730 owner=postfix group=postdrop inform=true
+
+	debian.have_var_spool_postfix::
+		/var/spool/postfix/active mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/bounce mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/corrupt mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/defer mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/deferred mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/flush mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/hold mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/incoming mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/private mode=700 owner=postfix group=root inform=true
+		/var/spool/postfix/trace mode=700 owner=postfix group=root inform=true
+
+files:
+
+	debian.have_usr_sbin_postqueue::
+		/usr/sbin/postqueue m=2555 owner=root  group=postdrop action=fixall inform=true
+
+	debian.have_usr_sbin_postdrop::
+		/usr/sbin/postdrop m=2555 owner=root  group=postdrop action=fixall inform=true
+

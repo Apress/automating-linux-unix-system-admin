@@ -1,0 +1,16 @@
+control:
+
+	solaris|solarisx86::
+		rsync_path	= ( "/opt/csw/bin/rsync" )
+	linux::
+		rsync_path	= ( "/usr/bin/rsync" )
+
+shellcommands:
+	any::
+		# the web_master variable holds the name of the host where we run rsync as a daemon
+		"$(rsync_path) -a --exclude 'previous' $(workdir)/outputs/ $(web_master)\:\:outputs-upload/`hostname`"
+			timeout=600 inform=false umask=022
+
+tidy:
+	$(workdir)/outputs pattern=* age=60 rmdirs=false
+

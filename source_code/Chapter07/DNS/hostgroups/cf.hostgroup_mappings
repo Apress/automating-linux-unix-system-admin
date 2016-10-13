@@ -1,0 +1,4 @@
+import:
+	any::			hostgroups/cf.any
+	caching_dns_servers::	hostgroups/cf.external_dns_cache
+

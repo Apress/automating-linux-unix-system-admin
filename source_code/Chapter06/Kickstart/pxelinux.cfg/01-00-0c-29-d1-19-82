@@ -1,0 +1,15 @@
+default 1
+timeout 100
+prompt 1
+display msgs/boot.msg
+F1 msgs/boot.msg
+F2 msgs/general.msg
+F3 msgs/expert.msg
+F4 msgs/param.msg
+F5 msgs/rescue.msg
+F7 msgs/snake.msg
+
+label 1
+ kernel rhel5_2/vmlinuz
+ append initrd=rhel5_2/initrd.img ramdisk_size=6878 ip=dhcp \
+ ks=nfs:192.168.1.251:/kickstart/rhel5_2/ks.cfg

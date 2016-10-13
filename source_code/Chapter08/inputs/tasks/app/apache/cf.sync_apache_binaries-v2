@@ -1,0 +1,61 @@
+directories:
+	redhat.web_server::
+		/usr/pkg mode=755 owner=root group=root inform=true
+
+control:
+	any::
+		addinstallable = ( reload_httpd restart_httpd )
+
+copy:
+	web_server::
+		$(master)/repl/root/usr/pkg/httpd-conf
+				dest=/usr/pkg/httpd-conf
+				mode=644
+				r=inf
+				purge=true
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=reload_httpd
+
+	web_server.Hr00.Min00_05::
+	        $(master)/repl/root/usr/pkg/httpd-2.2.9
+				dest=/usr/pkg/httpd-2.2.9
+                                mode=755
+				r=inf
+				purge=true
+				owner=root
+				group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=restart_httpd
+
+	        $(master)/repl/root/usr/pkg/php-5.2.6
+				dest=/usr/pkg/php-5.2.6
+                                mode=755
+				r=inf
+				purge=true
+				owner=root
+				group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=restart_httpd
+
+shellcommands:
+	redhat.web_server.restart_httpd::
+		"/usr/pkg/httpd-2.2.9/bin/apachectl restart"
+			timeout=60 inform=true
+
+	redhat.web_server.reload_httpd::
+		"/usr/pkg/httpd-2.2.9/bin/apachectl reload"
+			timeout=60 inform=true
+
+links:
+	web_server::
+		/usr/pkg/httpd		->!	/usr/pkg/httpd-2.2.9
+		/usr/pkg/httpd/conf	->!	/usr/pkg/httpd-conf
+

@@ -1,0 +1,71 @@
+###################################################
+# This pulls NFS automounter files from clients
+###################################################
+control:
+	any::
+		addinstallable		= (	restartautofs )
+	
+		AllowRedefinitionOf	= (	
+						auto_master
+						auto_home
+						) 
+
+
+        linux::
+		auto_master	= ( "auto.master" )
+		auto_home	= ( "auto.home" )
+		auto_net	= ( "auto.net" )
+		etc_auto_home	= ( "/etc/auto.home" )
+		etc_auto_master	= ( "/etc/auto.master" )
+
+        (solaris|solarisx86)::
+		auto_master	= ( "auto_master" )
+		auto_home	= ( "auto_home" )
+		auto_net	= ( "auto_net" )
+		etc_auto_home	= ( "/etc/auto_home" )
+		etc_auto_master	= ( "/etc/auto_master" )
+
+copy:
+	any::
+		$(master_etc)/autofs/$(auto_master)
+			dest=$(etc_auto_master)
+			mode=444
+			owner=root
+			group=root
+			server=$(policyhost)
+			trustkey=true
+			type=checksum
+			encrypt=true
+			define=restartautofs
+		
+		$(master_etc)/autofs/$(auto_home)
+			dest=$(etc_auto_home)
+			mode=444
+			owner=root
+			group=root
+			server=$(policyhost)
+			trustkey=true
+			type=checksum
+			encrypt=true
+			define=restartautofs
+
+
+shellcommands:
+	(debian|redhat).restartautofs::
+		# when config is updated, restart autofs
+		"/etc/init.d/autofs reload"
+			timeout=60 inform=true
+
+	(solaris|solarisx86).restartautofs::
+		# when config is updated, restart autofs
+		"/usr/sbin/svcadm restart autofs"
+			timeout=180 inform=false
+
+
+processes:
+	debian|redhat::
+		"automount" restart "/etc/init.d/autofs start" inform=true
+
+	solaris|solarisx86::
+		"/usr/sbin/svcadm enable autofs ; /usr/sbin/svcadm restart autofs" inform=true
+

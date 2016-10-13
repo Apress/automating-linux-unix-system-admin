@@ -1,0 +1,23 @@
+$TTL	600
+; distributed by cfengine, don't edit anywhere but the cfengine master
+@		IN	SOA	etchlamp.campin.net. hostmaster.campin.net. (
+				2008072900 ; serial
+                                1800       ; refresh (30 minutes)
+                                600        ; retry (10 minutes)
+                                2419200    ; expire (4 weeks)
+                                600        ; minimum (10 minutes)
+                                )
+
+@	IN	NS	etchlamp.campin.net.
+
+$ORIGIN 1.168.192.in-addr.arpa.
+
+1	IN	PTR	gw.campin.net.
+
+236	IN	PTR	rhlamp.campin.net.
+237	IN	PTR	hemingway.campin.net.
+239	IN	PTR	etchlamp.campin.net.
+248	IN	PTR	aurora.campin.net.
+249	IN	PTR	goldmaster.campin.net.
+251	IN	PTR	rhmaster.campin.net.
+

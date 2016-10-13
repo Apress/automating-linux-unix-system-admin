@@ -1,0 +1,38 @@
+control:
+	addinstallable = ( hupcron )
+
+editfiles:
+	debian::
+		{ /var/spool/cron/crontabs/root
+			AutoCreate
+			AppendIfNoSuchLine "31 23 * * * /usr/sbin/cfagent"
+			DefineClasses "hupcron"
+		}
+
+        #
+        # we need autocreate for the debian crontab, since by default root on debian will
+        # have no entries, but under solaris there's always a root crontab and if you
+        # say autocreate - cfengine won't ever edit the file, I have no idea why. The docs
+        # say "If this command is listed anywhere in the file action list, cfengine will 
+        # create the named file if it doesn't exist" but on solaris/sparc with cfengine 2.1.18
+        # it simply prevents the crontab from being edited AT ALL.
+        #
+
+	solaris|solarisx86::
+		{ /var/spool/cron/crontabs/root
+			AppendIfNoSuchLine "31 23 * * * /opt/csw/sbin/cfagent"
+			DefineClasses "hupcron"
+		}
+	redhat::
+		{ /var/spool/cron/root
+			AutoCreate
+			AppendIfNoSuchLine "31 23 * * * /usr/pkg/cfengine/sbin/cfagent"
+			DefineClasses "hupcron"
+		}
+
+shellcommands:
+	(solaris|solarisx86).hupcron::
+		# when the crontab is updated on solaris, restart cron
+		# (we only install solaris 10)
+		"/usr/sbin/svcadm restart cron" timeout=30
+

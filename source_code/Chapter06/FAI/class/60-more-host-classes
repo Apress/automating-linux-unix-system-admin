@@ -1,0 +1,6 @@
+#! /bin/bash
+
+case $HOSTNAME in
+	etchlamp)
+		echo "WEB" ;;
+esac

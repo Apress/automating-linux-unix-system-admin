@@ -1,0 +1,5 @@
+processes:
+	web_server.redhat::
+		#"httpd" restart "/etc/init.d/httpd start" inform=false umask=022
+		"httpd"  restart "/usr/pkg/httpd-2.2.9/bin/apachectl start" inform=true umask=022
+

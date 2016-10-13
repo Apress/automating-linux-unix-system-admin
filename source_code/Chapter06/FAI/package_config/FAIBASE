@@ -1,0 +1,27 @@
+PACKAGES aptitude
+linux-image-486
+cfengine2
+cron
+debconf-utils
+discover
+file
+hdparm
+jove
+less
+linuxlogo
+nfs-common
+nscd
+rdate
+rsync
+rsh-client
+openssh-client openssh-server
+strace
+sysutils
+tcsh
+time
+postfix openssl ssl-cert
+eject
+locales
+console-common
+pciutils usbutils
+syslog-ng

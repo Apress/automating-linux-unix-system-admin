@@ -1,0 +1,12 @@
+control:
+	domain				= ( mydomain.com )
+	AllowUsers			= ( root )
+	cfrunCommand			= ( "/var/cfagent/bin/cfagent" )
+	TrustKeysFrom			= ( 10.1.1 )
+	AllowConnectionsFrom 		= ( 10.1.1 )
+	AllowMultipleConnectionsFrom	= ( 10.1.1 )
+
+admit:
+	/usr/local/var/cfengine/inputs	*.mydomain.com
+	/var/cfagent/bin/cfagent	*.mydomain.com
+

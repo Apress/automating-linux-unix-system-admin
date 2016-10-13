@@ -1,0 +1,13 @@
+control:
+	any::
+
+		# When should cfexecd in daemon mode wake up the agent?
+		schedule	= ( Min00_05 Min20_25 Min40_45 )
+
+		EmailMaxLines	= ( 5000 ) # max lines of output to email
+		EmailFrom	= ( cfengine@campin.net )
+		sysadm		= ( ops@example.org ) # where to mail output
+		smtpserver	= ( smtp.campin.net ) # mail relay over SMTP
+		
+		cfrunCommand	= ( "$(cf_base_path)/cfagent" )
+

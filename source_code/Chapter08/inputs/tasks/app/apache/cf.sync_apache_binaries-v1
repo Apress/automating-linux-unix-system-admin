@@ -1,0 +1,21 @@
+directories:
+	web_server::
+		/usr/pkg mode=755 owner=root group=root inform=true
+
+shellcommands:
+	web_server.Hr00.Min00_05::
+		"/usr/bin/rsync -aq --delete --exclude 'conf' ${web_master}\:\:apache-2.2.9/ /usr/pkg/httpd-2.2.9"
+			timeout=600 inform=false umask=022
+
+		"/usr/bin/rsync -aq --delete ${web_master}\:\:php-5.2.6/ /usr/pkg/php-5.2.6"
+			timeout=600 inform=false umask=022
+
+	web_server::
+		"/usr/bin/rsync -aq --delete ${web_master}\:\:httpd-conf/ /usr/pkg/httpd-conf"
+			timeout=600 inform=false umask=022
+
+links:
+	web_server::
+		/usr/pkg/httpd ->! /usr/pkg/httpd-2.2.9
+		/usr/pkg/httpd/conf ->! /usr/pkg/httpd-conf
+

@@ -1,0 +1,23 @@
+control:
+	any::
+		addinstallable		= (	restartiptables )
+	
+copy:
+	redhat::
+		$(master_etc)/sysconfig/iptables 
+			dest=/etc/sysconfig/iptables
+			mode=444
+			owner=root
+			group=root
+			server=$(fileserver)
+			trustkey=true
+			type=checksum
+			encrypt=true
+			define=restartiptables
+		
+shellcommands:
+	redhat.restartiptables::
+		# when the config is updated, restart iptables
+		"/sbin/service iptables restart"
+			timeout=60 inform=true
+

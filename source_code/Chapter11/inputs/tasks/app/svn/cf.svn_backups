@@ -1,0 +1,5 @@
+shellcommands:
+	svn_server.debian.Hr00.Min00_05::
+                "/opt/admin-scripts/svn-backup"
+			timeout=600
+

@@ -1,0 +1,17 @@
+copy:
+	any::
+		$(master)/repl/admin-scripts
+			dest=/opt/admin-scripts
+			mode=550
+			owner=root
+			group=root
+			type=checksum
+			server=$(fileserver)
+			encrypt=true
+			r=inf
+			purge=true
+
+directories:
+	any::
+		/opt/admin-scripts  mode=750 owner=root group=root inform=false
+

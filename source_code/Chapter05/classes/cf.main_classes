@@ -1,0 +1,12 @@
+classes:
+
+	weekend		= ( Saturday Sunday )
+	weekdays	= ( Monday Tuesday Wednesday Thursday Friday )
+	weekday		= ( weekdays )
+
+	web_servers	= (	rmlamp
+				etchlamp
+	)
+
+	have_svc	= ( "/usr/bin/test -d /service" )
+

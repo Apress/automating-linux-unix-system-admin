@@ -1,0 +1,67 @@
+control:
+	solaris|solarisx86::
+		cf_base_path = ( /opt/csw/sbin )
+		workdir = ( /var/cfengine )
+		client_cfinput = ( /var/cfengine/inputs )
+
+	debian::
+		cf_base_path = ( /usr/sbin )
+		workdir = ( /var/lib/cfengine2 )
+		client_cfinput = ( /var/lib/cfengine2/inputs )
+
+	redhat::
+		cf_base_path = ( /usr/pkg/cfengine/sbin )
+		workdir = ( /var/cfengine )
+		client_cfinput = ( /var/cfengine/inputs )
+
+	!debian.!redhat.!(solaris|solarisx86)::
+		cf_base_path = ( /usr/pkg/cfengine/sbin )
+		workdir = ( /var/cfengine )
+		client_cfinput = ( /var/cfengine/inputs )
+
+	any::
+		addinstallable = ( hupcfexecdandcfservd )
+		AllowRedefinitionOf = ( branch )
+
+		domain = ( campin.net )
+		policyhost = ( goldmaster.campin.net )
+		fileserver = ( goldmaster.campin.net )
+		maxage = ( 7 )
+		TrustKeysFrom = ( goldmaster.campin.net )
+		branch = ( PROD )
+		master_cfinput = ( /var/lib/cfengine2/masterfiles/$(branch)/inputs )
+		master = ( /var/lib/cfengine2/masterfiles/$(branch) )
+		master_etc = ( /var/lib/cfengine2/masterfiles/$(branch)/repl/root/etc )
+		SplayTime = ( 5 )
+		IfElapsed = ( 4 )
+
+		repository = ( $(workdir)/backups )
+
+		Syslog = ( on )
+		SyslogFacility = ( LOG_DAEMON )
+		Editfilesize = ( 10024576 )
+
+		SecureInput = ( on )
+		NonAlphaNumFiles = ( on )
+		FileExtensions = ( o a ) # etc
+		SuspiciousNames = ( .mo lrk3 lkr3 )
+
+		#
+		# Keep editfiles before processes, since you might want to
+		# do something like edit a daemon's config file with
+		# editfiles then HUP it with processes.
+		#
+		# disable is before copy since sometimes we delete a
+		# symlink before copying in a real file
+		#
+		actionsequence = (
+			directories
+			disable
+			copy
+			editfiles
+			links
+			files
+			processes
+			shellcommands
+		)
+

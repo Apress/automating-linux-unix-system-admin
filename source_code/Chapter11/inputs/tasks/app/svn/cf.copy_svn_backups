@@ -1,0 +1,31 @@
+copy:
+	fileserver.Hr02.Min00_05::
+		/var/backups/cfengine
+				dest=/var/backups/svnbackups/cfengine
+				mode=555
+				r=inf
+				purge=false
+				owner=root
+				group=root
+				type=checksum
+				server=$(svn_server)
+				encrypt=true
+				trustkey=true
+
+		/var/backups/binary-server
+				dest=/var/backups/svnbackups/binary-server
+				mode=555
+				r=inf
+				purge=false
+				owner=root
+				group=root
+				type=checksum
+				server=$(svn_server)
+				encrypt=true
+				trustkey=true
+
+directories:
+	policyhost::
+		/var/backups/svnbackups/cfengine mode=750 owner=daemon group=root inform=false
+		/var/backups/svnbackups/binary-server mode=750 owner=daemon group=root inform=false
+

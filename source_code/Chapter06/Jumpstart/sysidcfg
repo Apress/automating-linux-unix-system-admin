@@ -1,0 +1,12 @@
+system_locale=en_US
+terminal=vt100
+name_service=DNS {domain_name=campin.net name_server=192.168.1.1
+                  search=campin.net,home.campin.net}
+network_interface=PRIMARY {default_route=192.168.1.1
+                           netmask=255.255.255.0
+                           protocol_ipv6=no}
+security_policy=NONE
+timezone=US/Pacific
+timeserver=localhost
+nfs4_domain=campin.net
+root_password=FOOqi4sBARbaz

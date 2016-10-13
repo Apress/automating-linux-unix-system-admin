@@ -1,0 +1,22 @@
+#!/bin/sh
+PATH=/bin:/usr/bin
+
+if [ -z "$RSYNC_REQUEST" -o -z "$RSYNC_HOST_NAME" ] 
+then
+	echo "We need to run in a rsyncd pre-exec environment." 
+	exit 1
+fi
+
+HOST_NAME=`basename "$RSYNC_HOST_NAME" .campin.net`
+
+case $RSYNC_REQUEST in
+outputs-upload/${HOST_NAME}|outputs-upload/${HOST_NAME}.campin.net)
+	# We need to rsync to a path with our hostname in it only, looks good
+	:
+	;;
+*)
+	echo "You can only upload to a path based on your own hostname."
+	exit 1
+	;;
+esac
+

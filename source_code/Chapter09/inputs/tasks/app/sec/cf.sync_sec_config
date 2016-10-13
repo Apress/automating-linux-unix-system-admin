@@ -1,0 +1,16 @@
+copy:
+	any::
+		$(master)/repl/root/usr/pkg/sec
+			dest=/usr/pkg/sec
+					r=inf
+					mode=755
+					type=checksum
+					purge=true
+					server=$(fileserver)
+					encrypt=true
+					define=restart_syslog_ng
+
+directories:
+	debian::
+		/usr/pkg/sec mode=755 owner=root group=root inform=false
+

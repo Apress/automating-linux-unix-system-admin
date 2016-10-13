@@ -1,0 +1,41 @@
+classes:
+	have_var_spool_postfix_etc_resolv_conf  = ( FileExists(/var/spool/postfix/etc/resolv.conf) )
+
+control:
+	any::
+		addinstallable		= ( reloadpostfix )
+		actionsequence		= ( resolve )
+		EmptyResolvConf		= (true )
+
+resolve:
+	any::
+		#
+		# If EmptyResolvConf is set to true, we'll completely wipe out
+		# resolv.conf EVEN if we have no matches in the below classses!
+		#
+		# When EmptyResolvConf is set, always be sure that you have an
+		# any class to catch all hosts with nameserver entries.
+		#
+		192.168.1.239
+		192.168.1.1
+		"# resolv.conf edited by cfengine, don't muck with this"
+
+copy:
+
+	# this is a local copy to keep the chroot'd postfix resolv.conf up to
+	# date
+	have_var_spool_postfix_etc_resolv_conf::
+		/etc/resolv.conf
+			dest=/var/spool/postfix/etc/resolv.conf
+			mode=644
+			owner=root
+			group=root
+			type=checksum
+			define=reloadpostfix
+
+shellcommands:
+
+	# reload postfix when we update the chroot resolv.conf
+	debian.reloadpostfix::
+		"/etc/init.d/postfix restart" timeout=30 inform=false
+

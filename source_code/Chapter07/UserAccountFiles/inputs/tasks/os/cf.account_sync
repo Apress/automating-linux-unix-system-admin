@@ -1,0 +1,80 @@
+###################################################
+#
+# This is for passwd/shadow/group files synced
+#
+###################################################
+classes:  # synonym groups:
+
+		safe_to_sync	= (     debian_4_0
+					redhat_s_5_2
+					sunos_5_10
+					)
+
+control:
+
+	debian::
+		passwd_file	= ( "passwd.debian" )
+		shadow_file	= ( "shadow.debian" )
+		group_file	= ( "group.debian" )
+
+	redhat::
+		passwd_file	= ( "passwd.redhat" )
+		shadow_file	= ( "shadow.redhat" )
+		group_file	= ( "group.redhat" )
+
+        solaris|solarisx86::
+		passwd_file	= ( "passwd.solaris" )
+		shadow_file	= ( "shadow.solaris" )
+		group_file	= ( "group.solaris" )
+
+copy:
+
+	safe_to_sync::
+		$(master_etc)/passwd/$(passwd_file)
+			dest=/etc/passwd
+			mode=644
+			server=$(fileserver)
+			trustkey=true
+			type=checksum
+			owner=root
+			group=root
+			encrypt=true
+			verify=true
+			size=>512
+
+	#
+	# There are size minimums for the passwd/shadow/group files so that we
+	# don't copy out empty files, and similarly a file way smaller than we
+	# think it should be really shouldn't be copied either... so the
+	# minmums are usually around half the size of the smallest version that
+	# we have of that particular file. This may need to be adjusted one day
+	# if these files happen to shrink.
+	#
+
+		$(master_etc)/shadow/$(shadow_file)
+			dest=/etc/shadow
+			mode=400
+			owner=root
+			group=root
+			server=$(fileserver)
+			trustkey=true
+			type=checksum
+			encrypt=true
+			size=>200
+
+		$(master_etc)/group/$(group_file)
+			dest=/etc/group
+			mode=644
+			owner=root
+			group=root
+			server=$(fileserver)
+			trustkey=true
+			type=checksum
+			encrypt=true
+			size=>200
+
+alerts:
+        
+	!safe_to_sync::
+        	"For some reason I am not set up to sync my passd/shadow/group files from cfengine, please see if this should really be the case - thanks."
+

@@ -1,0 +1,27 @@
+control:
+	actionsequence = ( files directories tidy disable processes )
+	domain = ( mydomain.com )
+	timezone = ( EDT EST )
+	access = ( root )
+	# Where cfexecd sends reports
+	smtpserver = ( mail.mydomain.com )
+	sysadm = ( root@mydomain.com )
+
+files:
+	/etc/passwd mode=644 owner=root action=fixall
+	/etc/shadow mode=600 owner=root action=fixall
+	/etc/group mode=644 owner=root action=fixall
+
+directories:
+	/tmp mode=1777 owner=root group=root
+
+tidy:
+	/tmp recurse=inf age=7 rmdirs=sub
+
+disable:
+	/root/.rhosts
+	/etc/hosts.equiv
+
+processes:
+	"cfservd" restart "/var/cfengine/bin/cfservd"
+	"cfexecd" restart "/var/cfengine/bin/cfexecd"

@@ -1,0 +1,76 @@
+#############################################################
+#
+# assumes BIND is already installed via the Debian bind9 package
+#
+#############################################################
+groups:
+	have_etc_rndc_key	= ( FileExists(/etc/bind/rndc.key) )
+
+
+control:
+	any::
+		addinstallable		= (     bind_installed bind_installed
+						reload_bind
+						)
+
+	debian::
+		DefaultPkgMgr           = ( dpkg )
+
+
+packages:
+	debian::
+		bind9 
+			version=9.3.4
+			cmp=ge
+			define=bind_installed
+			elsedefine=bind_not_installed
+
+
+processes:
+	debian.bind_installed::
+                "named" restart "/etc/init.d/bind9 start" inform=false umask=022
+
+
+copy:
+	debian.bind_installed::
+		$(master_etc)/bind/debian-ext/
+				dest=/etc/bind/
+				r=inf
+				mode=644
+				type=checksum
+				purge=false
+				server=$(fileserver)
+				encrypt=true
+				owner=root
+				group=root
+				define=reload_bind
+
+
+shellcommands:
+	debian.reload_bind::
+		# when config is updated, reload the bind process
+		"/etc/init.d/bind9 reload" timeout=30
+
+
+#
+# These file and directory settings are going to fix the box when the local
+# password/shadow/group info changed via cfengine. If the UID/GID changes then
+# cfengine will fix them again.
+#
+
+files:
+	debian.bind_installed.have_etc_rndc_key::
+	        /etc/bind/rndc.key owner=bind group=bind m=640 action=fixall inform=true syslog=on
+
+
+directories:
+	debian.bind_installed::
+		/var/cache/bind mode=775 owner=root group=bind inform=true syslog=on
+		/etc/bind mode=2755 owner=root group=bind inform=true syslog=on
+
+
+alerts:
+	debian.!bind_installed::
+		"Error: I have been named as an external cache host, but I don't seem to have the bind9 package installed."
+
+

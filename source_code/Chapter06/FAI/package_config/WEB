@@ -1,0 +1,14 @@
+PACKAGES aptitude
+apache2-utils
+apache2.2-common
+apache2-mpm-prefork
+libapr1
+libexpat1
+libpq4
+libsqlite3-0
+libaprutil1
+mime-support
+libapache2-mod-php5
+libxml2
+php5
+php5-common

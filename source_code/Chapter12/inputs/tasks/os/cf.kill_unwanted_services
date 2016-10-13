@@ -1,0 +1,20 @@
+control:
+        any::
+		AddInstallable		= ( disable_xfs )
+
+processes:
+	solarisx86|solaris::
+		"dtlogin" signal=kill 
+
+	redhat::
+		"xfs" action=warn matches=<1 define=disable_xfs
+
+shellcommands:
+	redhat.disable_xfs::
+		"/sbin/service xfs stop"  timeout=60 inform=true
+		"/sbin/chkconfig xfs off" timeout=60 inform=true
+
+disable:
+	solarisx86|solaris::
+                /etc/rc2.d/S99dtlogin
+

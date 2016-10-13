@@ -1,0 +1,70 @@
+control:
+	solaris|solarisx86::
+		cf_base_path	= ( /opt/csw/sbin )
+		workdir		= ( /var/cfengine )
+		client_cfinput	= ( /var/cfengine/inputs )
+
+	debian::
+		cf_base_path	= ( /usr/sbin )
+		workdir		= ( /var/lib/cfengine2 )
+		client_cfinput	= ( /var/lib/cfengine2/inputs )
+
+	redhat::
+		cf_base_path	= ( /usr/pkg/cfengine/sbin )
+		workdir		= ( /var/cfengine )
+		client_cfinput	= ( /var/cfengine/inputs )
+
+	!(debian|redhat|solaris|solarisx86)::
+		cf_base_path	= ( /usr/pkg/cfengine/sbin )
+		workdir		= ( /var/cfengine )
+		client_cfinput	= ( /var/cfengine/inputs )
+
+	any::
+
+		actionsequence	= (	copy.IfElapsed0
+					links.IfElapsed0
+					processes.IfElapsed0
+		)
+	
+		domain		= ( campin.net )
+		policyhost	= ( goldmaster.campin.net )
+		master_cfinput	= ( /var/lib/cfengine2/masterfiles/PROD/inputs )
+		SplayTime	= ( 0 )
+
+
+ignore:
+	# RCS/svn administrative stuff will be ignored in all copies
+	RCS
+	.svn
+
+processes:
+	any::
+		"cfexecd" restart "$(cf_base_path)/cfexecd"
+		"cfservd" restart "$(cf_base_path)/cfservd"
+		"cfenvd"  restart "$(cf_base_path)/cfenvd"
+
+links:
+	redhat|solaris|solarisx86::
+		/var/cfengine/bin/cfagent -> $(cf_base_path)/cfagent
+
+	# debian already sets up a symlink from /var/lib/cfengine2/bin
+	# to /usr/bin so no changes required on that platform
+
+copy:
+
+	#
+	# Everything in /var/cfengine/masterfiles/inputs on the master
+	# _and_ everything in its subdirectories is copied to every host.
+	#
+	$(master_cfinput)/	dest=$(workdir)/inputs/
+				r=inf
+				mode=700
+				type=binary
+				exclude=*~
+				exclude=#*
+				exclude=*,v
+				purge=true
+				server=$(policyhost)
+				trustkey=true
+				encrypt=true
+

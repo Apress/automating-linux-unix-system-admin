@@ -1,0 +1,4 @@
+# <type> <mountpoint> <size in mb> [mount options] [;extra options]
+disk_config	disk1
+primary /	150-	rw,errors=remount-ro ;	-c -j ext3
+logical swap	400-500	rw

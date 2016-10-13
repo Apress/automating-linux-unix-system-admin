@@ -1,0 +1,5 @@
+shellcommands:
+	web_master.linux.Min00_05::
+		"/opt/admin-scripts/cfoutputs-report"
+			timeout=7200 inform=true
+

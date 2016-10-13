@@ -1,0 +1,8 @@
+# imported by ALL hosts, careful with this one
+#
+# disted by cfengine, don't edit locally
+import:
+	any::
+		tasks/os/cf.motd
+		tasks/os/cf.cfengine_cron_entries
+

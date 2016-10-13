@@ -1,0 +1,22 @@
+control:
+	any::
+		addinstallable = ( restart_nfs )
+
+directories:
+	binary_server.(solaris|solarisx86)::
+		/export/pkg/sunos_sun4u	   mode=755 owner=root group=root inform=false
+		/export/pkg/i686.redhat  mode=755 owner=root group=root inform=false
+		/export/pkg/i686.debian  mode=755 owner=root group=root inform=false
+
+shellcommands:
+	binary_server.restart_nfs.(solaris|solarisx86)::
+		"/usr/sbin/svcadm restart network/nfs/server"
+			timeout=60 inform=true
+
+editfiles:
+	binary_server.(solaris|solarisx86)::
+		{ /etc/dfs/dfstab
+			AppendIfNoSuchLine	"share -F nfs -o rw,anon=0 /export/pkg"
+			DefineClasses		"restart_nfs"
+		}
+

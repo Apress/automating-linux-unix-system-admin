@@ -1,0 +1,29 @@
+NameVirtualHost *:443
+
+<VirtualHost *:443>
+	ServerName      svn.campin.net
+	ServerAlias     svn
+
+	DocumentRoot	/var/www
+	ServerAdmin 	admins@foo.bar
+	ErrorLog    	/var/log/apache2/svn-error.log
+	CustomLog   	/var/log/apache2/svn-access.log combined
+
+	<Location /svn>
+		DAV svn
+		SVNParentPath /var/svn/repository
+		AuthType Basic
+		AuthName "Campin.net Subversion Repository"
+		AuthUserFile /etc/apache2/dav_svn.passwd
+		AuthzSVNAccessFile /etc/apache2/svn_accessfile
+		Require valid-user
+		
+		<LimitExcept GET PROPFIND OPTIONS REPORT>
+		 Satisfy all
+		</LimitExcept>
+	</Location>
+
+	SSLEngine on
+	SSLCertificateFile /etc/apache2/ssl/apache.pem
+
+</VirtualHost>

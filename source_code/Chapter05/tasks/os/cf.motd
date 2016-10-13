@@ -1,0 +1,62 @@
+classes: # synonym groups:
+	have_etc_motd_local	= ( FileExists(/etc/motd-local) )
+
+control:
+	masterfile		= ( $(master_etc)/motd-master )
+	local_masterfile	= ( /etc/motd-master )
+	local_message		= ( /etc/motd-local )
+
+copy:
+	any::
+		$(masterfile)
+			dest=$(local_masterfile)
+			mode=755
+			owner=root
+			group=root
+			type=checksum
+			server=$(fileserver)
+			encrypt=true
+
+editfiles:
+	have_etc_motd_local::
+		{ /etc/motd
+		BeginGroupIfFileIsNewer "$(local_message)"
+			EmptyEntireFilePlease
+			InsertFile "$(local_masterfile)"
+			InsertFile "$(local_message)"
+			PrependIfNoSuchLine "This system is running $(class):$(arch)"
+		EndGroup
+
+		BeginGroupIfFileIsNewer "$(local_masterfile)"
+			EmptyEntireFilePlease
+			InsertFile "$(local_masterfile)"
+			InsertFile "$(local_message)"
+			PrependIfNoSuchLine "This system is running $(class):$(arch)"
+		EndGroup
+
+		BeginGroupIfNoLineContaining "campin.net"
+			EmptyEntireFilePlease
+			InsertFile "$(local_masterfile)"
+			InsertFile "$(local_message)"
+			PrependIfNoSuchLine "This system is running $(class):$(arch)"
+		EndGroup
+
+		}
+	
+	!have_etc_motd_local::
+		{ /etc/motd
+
+		BeginGroupIfFileIsNewer "$(local_masterfile)"
+			EmptyEntireFilePlease
+			InsertFile "$(local_masterfile)"
+			PrependIfNoSuchLine "This system is running $(class):$(arch)"
+		EndGroup
+
+		BeginGroupIfNoLineContaining "campin.net"
+			EmptyEntireFilePlease
+			InsertFile "$(local_masterfile)"
+			PrependIfNoSuchLine "This system is running $(class):$(arch)"
+		EndGroup
+
+	}
+

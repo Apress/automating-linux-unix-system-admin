@@ -1,0 +1,84 @@
+classes:  # synonym groups:
+
+	ntp_servers			= (	rhmaster
+						goldmaster
+						)
+
+control:
+
+        any::
+		AddInstallable		= ( restartntpd fix_time )
+
+		# We allow one or more  variables to be redefined, because it's
+		# convenient to define a global value with "any::", then
+		# selectively redefine it where appropriate
+		AllowRedefinitionOf	= ( ntp_conf_source ) 
+	
+		#
+		# The default ntp.conf doesn't sync off-site
+		#
+		ntp_conf_source	= ( "ntp.conf" )
+
+	linux::
+		ntp_user	= ( "ntp" )
+		ntp_conf_dest	= ( "/etc/ntp.conf" )
+		drift_file	= ( "/var/lib/ntp/ntp.drift" )
+
+	solaris|solarisx86::
+		ntp_user	= ( "root" )
+		ntp_conf_dest	= ( "/etc/inet/ntp.conf" )
+		drift_file	= ( "/var/ntp/ntp.drift" )
+		ntp_conf_source	= ( "ntp.server" )
+
+	ntp_servers::
+		# the ntp.conf for these hosts causes ntpd to sync
+		# off-site, and share the information with the local net
+		ntp_conf_source	= ( "ntp.conf-master" )
+
+files:
+	# ensure that the drift file exists and is 
+	# owned and writable by the correct user
+	any::
+		$(drift_file) mode=0644 action=touch 
+		  owner=$(ntp_user) group=$(ntp_user)
+
+copy:
+
+	any::
+		$(master_etc)/ntp/$(ntp_conf_source)
+				dest=$(ntp_conf_dest)
+				mode=644
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				owner=root
+				group=root
+				define=restartntpd
+
+shellcommands:
+
+	# start ntpd when it's not running
+	debian.restartntpd::
+		"/etc/init.d/ntp restart" timeout=30 inform=true
+
+	# start ntpd when it's not running
+	redhat.restartntpd::
+		"/etc/init.d/ntpd restart" timeout=30 inform=true
+
+	(solarisx86|solaris).restartntpd::
+		"/usr/sbin/svcadm restart svc:/network/ntp" timeout=30 inform=true
+	
+processes:
+
+	# start ntpd when it's not running
+	debian::
+		"ntpd" restart "/etc/init.d/ntp start"
+
+	# start ntpd when it's not running
+	redhat::
+		"ntpd" restart "/etc/init.d/ntpd start"
+
+	# this is for when it's not even enabled
+	solarisx86|solaris::
+		"ntpd" restart "/usr/sbin/svcadm enable svc:/network/ntp"
+

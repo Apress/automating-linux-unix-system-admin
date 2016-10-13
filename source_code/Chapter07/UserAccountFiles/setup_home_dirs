@@ -1,0 +1,15 @@
+#!/bin/sh
+PATH=/usr/sbin:/usr/bin:/opt/csw/bin
+
+USERFILE=/export/home/USERFILE
+
+for user in `cat $USERFILE`
+do
+        USERDIR=/export/home/$user
+        if [ ! -d $USERDIR ]
+        then
+                cp -r /export/home/skel $USERDIR
+                chmod 750 $USERDIR
+                chown -R ${user}:${user} $USERDIR
+        fi
+done

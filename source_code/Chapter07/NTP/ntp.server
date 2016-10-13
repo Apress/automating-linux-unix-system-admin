@@ -1,0 +1,26 @@
+# ntp configuration for Solaris 10 hosts
+
+# Some of the devices benefit from "fudge" factors.  See the xntpd
+# documentation.
+
+# Either a peer or server.  Replace "XType" with a value from the
+# table above.
+#server 127.127.XType.0
+#fudge 127.127.XType.0 stratum 0
+#keys /etc/inet/ntp.keys
+#trustedkey 0
+#requestkey 0
+#controlkey 0
+
+server 192.168.1.249
+server 192.168.1.251
+
+#broadcast 224.0.1.1 ttl 4
+
+enable auth monitor
+driftfile /var/ntp/ntp.drift
+statsdir /var/ntp/ntpstats/
+filegen peerstats file peerstats type day enable
+filegen loopstats file loopstats type day enable
+filegen clockstats file clockstats type day enable
+

@@ -1,0 +1,32 @@
+$TTL 600
+; distributed by cfengine, don't edit anywhere but the cfengine master
+@		IN	SOA	etchlamp.campin.net. hostmaster.campin.net. (
+				2008072900 ; serial
+                                1800       ; refresh (30 minutes)
+                                600        ; retry (10 minutes)
+                                2419200    ; expire (4 weeks)
+                                600        ; minimum (10 minutes)
+                                )
+
+		IN	NS	etchlamp.campin.net.
+
+; the A record for campin.net
+	600	IN	A	66.219.68.159
+
+
+etchlamp	IN	A	192.168.1.239
+aurora		IN	A	192.168.1.248
+goldmaster	IN	A	192.168.1.249
+rhmaster	IN	A	192.168.1.251
+rhlamp		IN	A	192.168.1.236
+hemingway	IN	A	192.168.1.237
+
+; www.campin.net is a CNAME back to the A record for campin.net
+www	600	IN	CNAME   @
+
+skitzo	86400	IN	A	64.81.57.165
+scampi	86400	IN	A	66.219.68.159
+
+; give the default gateway an easy to remember name
+gw		IN	A	192.168.1.1
+

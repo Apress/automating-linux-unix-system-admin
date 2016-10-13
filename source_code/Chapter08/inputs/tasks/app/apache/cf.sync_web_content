@@ -1,0 +1,9 @@
+directories:
+	web_server::
+		/var/www/html mode=755 owner=root group=root inform=true
+
+shellcommands:
+	web_server.Min00_05::
+		"/usr/bin/rsync -aq --delete ${web_master}\:\:www-content/ /var/www/html"
+			timeout=600 inform=false umask=022
+

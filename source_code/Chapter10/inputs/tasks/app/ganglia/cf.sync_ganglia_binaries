@@ -1,0 +1,67 @@
+control:
+	any::
+		AddInstallable		= ( ganglia_binaries_updated ganglia_conf_updated  )
+		AllowRedefinitionOf	= ( ganglia_master_dir )
+		dest_dir		= ( "ganglia-3.0.7" )
+
+	debian_4_0.i686::
+		ganglia_master_dir	= ( "ganglia-3.0.7-i686.debian" )
+
+	redhat.i686::
+		ganglia_master_dir	= ( "ganglia-3.0.7-i686.redhat" )
+
+	solaris|solarisx86::
+		ganglia_master_dir	= ( "ganglia-3.0.7.sunos_sun4u" )
+
+classes:  # synonym groups:
+	have_usr_pkg_ganglia_3_0_7	= ( IsDir(/usr/pkg/ganglia-3.0.7) )
+
+copy:
+	any.!have_usr_pkg_ganglia_3_0_7::
+	        $(master)/repl/root/usr/pkg/$(ganglia_master_dir)
+				dest=/usr/pkg/$(dest_dir)
+				mode=755
+				r=inf
+				owner=root
+				group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=ganglia_binaries_updated
+
+	any::
+	        $(master)/repl/root/usr/pkg/ganglia-conf
+				dest=/usr/pkg/ganglia-conf
+				mode=755
+				r=inf
+				owner=root
+				group=root
+                                type=checksum
+                                server=$(fileserver)
+                                encrypt=true
+                                define=ganglia_conf_updated
+
+shellcommands:
+	ganglia_binaries_updated::
+		# all hosts run gmond, restart it completely when the binaries are updated
+		"/usr/bin/pkill gmond ; sleep 1 ; /usr/bin/pkill -9 gmond ; /usr/pkg/ganglia/sbin/gmond -c /usr/pkg/ganglia-conf/gmond.conf "
+			timeout=60 inform=true owner=daemon
+
+	ganglia_web.ganglia_binaries_updated::
+		# the box running the ganglia web interface runs gmetad, restart it
+		#  when the binaries update
+		"/usr/bin/pkill gmetad ; sleep 1 ; /usr/bin/pkill -9 gmetad ; /usr/pkg/ganglia/sbin/gmetad -c /usr/pkg/ganglia-conf/gmetad.conf "
+			timeout=60 inform=true owner=daemon
+
+processes:
+	any::
+		"gmond" restart "/usr/pkg/ganglia/sbin/gmond -c /usr/pkg/ganglia-conf/gmond.conf " inform=true umask=022 owner=daemon
+
+	ganglia_conf_updated::
+		"gmond" signal=hup inform=true
+		"gmetad" signal=hup inform=true
+
+links:
+	any::
+                /usr/pkg/ganglia ->! /usr/pkg/$(dest_dir)
+

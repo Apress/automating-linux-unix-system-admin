@@ -1,0 +1,56 @@
+control:
+	fai_server::
+		AddInstallable          = ( restart_inetd restart_dhcpd )
+
+copy:
+	fai_server::
+		$(master)/repl/root/srv/fai/config
+				dest=/srv/fai/config
+				mode=755
+				r=inf
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+
+		$(master_etc)/inetd.conf
+				dest=/etc/inetd.conf
+				mode=755
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_inetd
+
+		$(master_etc)/fai/make-fai-nfsroot.conf
+				dest=/etc/fai/make-fai-nfsroot.conf
+				mode=755
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+
+		$(master_etc)/dhcp3/dhcpd.conf
+				dest=/etc/dhcp3/dhcpd.conf
+				mode=755
+				owner=root
+				group=root
+				type=checksum
+				server=$(fileserver)
+				encrypt=true
+				define=restart_dhcpd
+
+directories:
+	fai_server::
+                /srv/fai/config mode=755 owner=root group=root inform=false
+
+shellcommands:
+	debian.restart_inetd::
+		"/etc/init.d/openbsd-inetd restart" timeout=30 inform=true
+
+	debian.restart_dhcpd::
+		"/etc/init.d/dhcp3-server restart" timeout=30 inform=true
+

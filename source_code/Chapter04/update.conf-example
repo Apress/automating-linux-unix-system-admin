@@ -1,0 +1,34 @@
+control:
+	actionsequence	= ( copy tidy )
+	domain		= ( mydomain.com )
+	workdir		= ( /var/cfengine )
+	policyhost	= ( server.mydomain.com )
+	master_cfinput	= ( /usr/local/var/cfengine/inputs )
+	cf_install_dir	= ( /usr/local/sbin )
+
+copy:
+	$(cf_install_dir)/cfagent	dest=$(workdir)/bin/cfagent
+					mode=755
+					type=checksum
+
+	$(cf_install_dir)/cfservd	dest=$(workdir)/bin/cfservd
+					mode=755
+					type=checksum
+
+	$(cf_install_dir)/cfexecd	dest=$(workdir)/bin/cfexecd
+					mode=755
+					type=checksum
+
+	$(master_cfinput)		dest=$(workdir)/inputs
+					r=inf
+					mode=644
+					type=binary
+					exclude=*.lst
+					exclude=*~
+					exclude=#*
+					server=$(policyhost)
+					trustkey=true
+
+tidy:
+	$(workdir)/outputs pattern=* age=7
+

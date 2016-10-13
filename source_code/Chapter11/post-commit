@@ -1,0 +1,32 @@
+#!/bin/sh
+# This is enhanced from the version in the book, with this one we don't email
+# out security sensitive information.
+#
+# To Do: clean up the code so there's not so much duplication between the if and
+# elif sections.
+#
+REPOS="$1"
+REV="$2"
+LOG=`/usr/bin/svnlook log -r $REV $REPOS`
+AUTHOR=`/usr/bin/svnlook author -r $REV $REPOS`
+CHANGED_DIRS=`/usr/bin/svnlook dirs-changed -r $REV $REPOS`
+CHANGED=`/usr/bin/svnlook changed -r $REV $REPOS`
+# default to sending out a diff in the notification email
+DIFF="--with-diff"
+FOOTER=
+
+for DIR in "$CHANGED_DIRS"
+do
+        if echo "$DIR" | grep 'etc/shadow' >/dev/null
+        then
+                DIFF=
+                FOOTER="Leaving out the diff since it's a security risk, go view the file(s) yourself."
+        elif echo "$DIR" | grep 'software_dist/ssh_keys' >/dev/null
+        then
+                DIFF=
+                FOOTER="Leaving out the diff since it's a security risk, go view the file(s) yourself."
+        fi
+done
+
+/usr/bin/svnnotify --repos-path "$REPOS" --revision "$REV" "$DIFF" --to nate@campin.net --from "$AUTHOR" --reply-to nate@campin.net --subject-prefix "[CFENGINE SVN]" --subject-cx --no-first-line --footer "$FOOTER"
+
